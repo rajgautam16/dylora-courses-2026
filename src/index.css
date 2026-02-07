@@ -1,13 +1,91 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #050505;
+  --surface: #0F0F0F;
+  --accent: #D9F99D; /* Acid Lime */
+  --text-main: #Eaeaea;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+  cursor: none; /* Hide default cursor for custom one */
+}
+
+.font-display { font-family: 'Syne', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* --- UI ELEMENTS --- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.text-outline {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+  color: transparent;
+  transition: all 0.5s ease;
+}
+.text-outline:hover {
+  color: var(--accent);
+  -webkit-text-stroke: 1px var(--accent);
+}
+
+/* --- PRELOADER --- */
+.preloader {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #000;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--accent);
+}
+.counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+/* --- CUSTOM CURSOR --- */
+.cursor-dot {
+  width: 8px; height: 8px; 
+  background-color: var(--accent);
+  position: fixed; top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 9999;
+  pointer-events: none;
+}
+.cursor-outline {
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  position: fixed; top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 9999;
+  pointer-events: none;
+}
+body.hovering .cursor-outline {
+  width: 60px; height: 60px;
+  background-color: rgba(217, 249, 157, 0.1);
+  border-color: var(--accent);
+  mix-blend-mode: difference;
+}
+
+/* --- ANIMATION UTILS --- */
+.reveal-text { overflow: hidden; display: block; }
+.reveal-text span { display: block; transform: translateY(100%); }
+
+.project-card:hover .parallax-img {
+  transform: scale(1.05);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
