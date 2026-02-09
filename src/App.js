@@ -8,6 +8,7 @@ import Internships from './pages/Internships';
 import Quizzes from './pages/Quizzes';
 import Blog from './pages/Blog';
 import Login from './pages/Login';
+import MasterTechSkills from './pages/MasterTechSkills';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/master-tech-skills" element={<MasterTechSkills />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/internships" element={<Internships />} />
           <Route path="/quizzes" element={<Quizzes />} />
