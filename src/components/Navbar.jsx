@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ user, setUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isEn, setIsEn] = useState(true);
+  const navigate = useNavigate();
 
   // Toggle Theme
   useEffect(() => {
@@ -14,6 +15,13 @@ const Navbar = () => {
   const toggleTheme = () => setIsDark(!isDark);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleLang = () => setIsEn(!isEn);
+
+  // Logout Function
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
 
   return (
     <>
@@ -37,9 +45,15 @@ const Navbar = () => {
           <button className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }} onClick={toggleLang}>
             {isEn ? 'Switch Language (EN)' : 'Switch Language (IN)'}
           </button>
-          <Link to="/login" style={{width: '100%'}}>
-             <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Log In</button>
-          </Link>
+          
+          {/* MOBILE LOGIN/LOGOUT LOGIC */}
+          {user ? (
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleLogout}>Log Out</button>
+          ) : (
+            <Link to="/login" style={{width: '100%'}} onClick={toggleMobileMenu}>
+               <button className="btn btn-primary" style={{ width: '100%' }}>Log In</button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -79,9 +93,23 @@ const Navbar = () => {
                 <div className="knob"></div>
               </div>
               
-              <Link to="/login">
-                  <button className="btn btn-primary">Log In</button>
-              </Link>
+              {/* DESKTOP LOGIN/LOGOUT LOGIC */}
+              {user ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                   {user.picture && (
+                     <img 
+                       src={user.picture} 
+                       alt="Profile" 
+                       style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--primary)' }} 
+                     />
+                   )}
+                   <button className="btn btn-primary" onClick={handleLogout}>Log Out</button>
+                </div>
+              ) : (
+                <Link to="/login">
+                    <button className="btn btn-primary">Log In</button>
+                </Link>
+              )}
             </div>
 
             <div className="mobile-toggle" onClick={toggleMobileMenu}>
