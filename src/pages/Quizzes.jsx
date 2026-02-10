@@ -11,7 +11,9 @@ const Quizzes = () => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [stats, setStats] = useState({ questions: 0, topics: 0, learners: 0 });
     const [scrollElements, setScrollElements] = useState([]);
+    const [editableCode, setEditableCode] = useState('');
     const sectionsRef = useRef({});
+    const iframeRef = useRef(null);
 
     const staticStats = [
         { number: '500+', label: 'Quiz Questions' },
@@ -194,6 +196,7 @@ document.addEventListener('click', () => {
         setScore(0);
         setShowResult(false);
         setCodeOutput(quiz.code);
+        setEditableCode(quiz.code);
     };
 
     const handleAnswerClick = (optionIndex) => {
@@ -217,15 +220,100 @@ document.addEventListener('click', () => {
     const handleRunCode = () => {
         try {
             if (selectedQuiz?.id === 1) {
-                setCodeOutput('✓ HTML rendered successfully!');
+                // HTML - render in iframe
+                if (iframeRef.current) {
+                    try {
+                        const iframe = iframeRef.current;
+                        const doc = iframe.contentWindow.document;
+                        
+                        doc.open();
+                        doc.write(editableCode);
+                        doc.close();
+                        
+                        setCodeOutput('✓ HTML rendered!');
+                    } catch (err) {
+                        console.error('HTML Error:', err);
+                        setCodeOutput(`Error: ${err.message}`);
+                    }
+                }
             } else if (selectedQuiz?.id === 2) {
-                setCodeOutput('✓ CSS applied successfully!');
+                // CSS - render with HTML in iframe
+                if (iframeRef.current) {
+                    try {
+                        const fullHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        ${editableCode}
+    </style>
+</head>
+<body>
+    <h1>CSS Styling Applied</h1>
+    <p>Your styles are now active on this page.</p>
+    <button>Sample Button</button>
+    <div class="box">Styled Box</div>
+</body>
+</html>`;
+                        
+                        const iframe = iframeRef.current;
+                        const doc = iframe.contentWindow.document;
+                        
+                        doc.open();
+                        doc.write(fullHTML);
+                        doc.close();
+                        
+                        setCodeOutput('✓ CSS applied!');
+                    } catch (err) {
+                        console.error('CSS Error:', err);
+                        setCodeOutput(`Error: ${err.message}`);
+                    }
+                }
             } else {
-                eval(selectedQuiz?.code);
-                setCodeOutput('✓ Code executed successfully! Check console.');
+                // JavaScript - capture console output
+                const logs = [];
+                const originalLog = console.log;
+                const originalError = console.error;
+                const originalWarn = console.warn;
+                
+                console.log = (...args) => {
+                    logs.push(args.map(arg => 
+                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                    ).join(' '));
+                    originalLog(...args);
+                };
+                
+                console.error = (...args) => {
+                    logs.push('❌ ERROR: ' + args.map(arg => 
+                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                    ).join(' '));
+                    originalError(...args);
+                };
+                
+                console.warn = (...args) => {
+                    logs.push('⚠️ WARNING: ' + args.join(' '));
+                    originalWarn(...args);
+                };
+                
+                try {
+                    eval(editableCode);
+                    console.log = originalLog;
+                    console.error = originalError;
+                    console.warn = originalWarn;
+                    
+                    setCodeOutput(logs.length > 0 ? logs.join('\n') : '✓ Code executed!\n(No console output)');
+                } catch (error) {
+                    console.log = originalLog;
+                    console.error = originalError;
+                    console.warn = originalWarn;
+                    setCodeOutput(`❌ Error: ${error.message}`);
+                }
             }
         } catch (error) {
-            setCodeOutput(`Error: ${error.message}`);
+            setCodeOutput(`Fatal Error: ${error.message}`);
         }
     };
 
@@ -300,12 +388,31 @@ document.addEventListener('click', () => {
                                 
                                 <div className="editor-content">
                                     <div className="code-input">
-                                        <pre><code>{selectedQuiz.code}</code></pre>
+                                        <textarea 
+                                            className="code-textarea"
+                                            value={editableCode}
+                                            onChange={(e) => setEditableCode(e.target.value)}
+                                            spellCheck="false"
+                                        />
                                     </div>
                                     
                                     <div className="code-output">
                                         <div className="output-header">OUTPUT</div>
-                                        <pre><code>{codeOutput || selectedQuiz.code}</code></pre>
+                                        {selectedQuiz.id === 1 || selectedQuiz.id === 2 ? (
+                                            <iframe 
+                                                key={`iframe-${selectedQuiz.id}-${currentQuestion}`}
+                                                ref={iframeRef}
+                                                className="output-iframe"
+                                                title="Code Output"
+                                                sandbox="allow-scripts"
+                                                frameBorder="0"
+                                                allowFullScreen
+                                            />
+                                        ) : (
+                                            <div className="javascript-output">
+                                                <pre><code>{codeOutput || 'Click Run to execute JavaScript'}</code></pre>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

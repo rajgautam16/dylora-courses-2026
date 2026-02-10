@@ -730,9 +730,36 @@
     border-right: 1px solid var(--border);
 }
 
+.code-textarea {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    border: none;
+    padding: 25px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    white-space: pre;
+    word-wrap: normal;
+    overflow-wrap: normal;
+}
+
 .code-output {
     background: rgba(15, 7, 32, 0.02);
     border-left: 1px solid var(--border);
+    overflow: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 25px;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
 }
 
 .output-header {
@@ -755,6 +782,48 @@
 .code-output code {
     background: none;
     padding: 0;
+}
+
+.javascript-output {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.javascript-output pre {
+    margin: 0;
+    padding: 15px;
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    flex: 1;
+    overflow: auto;
+}
+
+.javascript-output code {
+    display: block;
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+.output-iframe {
+    background: white;
+    display: block;
+    width: 100%;
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+}
+
+[data-theme="dark"] .output-iframe {
+    background: #f9fafb;
 }
 
 .run-btn {

@@ -9,6 +9,7 @@ import Quizzes from './pages/Quizzes';
 import Blog from './pages/Blog';
 import Login from './pages/Login';
 import MasterTechSkills from './pages/MasterTechSkills';
+import CodePenDemo from './pages/CodePenDemo';
 import './App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/quizzes" element={<Quizzes />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/codepen" element={<CodePenDemo />} />
         </Routes>
         <Footer />
       </div>
