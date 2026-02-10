@@ -9,7 +9,7 @@ const Home = () => {
             tags: ["Web Dev", "React", "Node"],
             img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80",
             type: "Paid",
-            price: "$49",
+            price: "Rs.4999",
             progress: 45
         },
         {
@@ -25,7 +25,7 @@ const Home = () => {
             tags: ["Security", "Linux", "Network"],
             img: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80",
             type: "Paid",
-            price: "$89",
+            price: "Rs.8999",
             progress: 0
         }
     ];
