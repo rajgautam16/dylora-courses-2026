@@ -258,7 +258,7 @@ nav { height: 100%; display: flex; justify-content: space-between; align-items: 
 .mobile-nav-link:hover { background: rgba(124, 58, 237, 0.05); color: var(--primary); }
 
 @media(max-width: 1024px) { 
-  .nav-center, .search-container, .desktop-actions { display: none; } 
+  .nav-center, .search-container, .desktop-actions, .nav-middle { display: none; } 
   .mobile-toggle { display: block; }
 }
 
@@ -638,4 +638,10 @@ button,
   border-radius: 10px;
   border: none;
   cursor: pointer;
+}
+
+.nav-middle {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Spacing between Search and Links */
 }
