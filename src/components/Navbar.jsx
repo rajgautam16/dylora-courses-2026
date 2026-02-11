@@ -6,8 +6,16 @@ const Navbar = ({ user, setUser }) => {
   const [isDark, setIsDark] = useState(false);
   const [isEn, setIsEn] = useState(true);
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Toggle Theme
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${searchTerm}`);
+      setSearchTerm('');
+    }
+  };
+
   useEffect(() => {
     document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
@@ -16,7 +24,6 @@ const Navbar = ({ user, setUser }) => {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleLang = () => setIsEn(!isEn);
 
-  // Logout Function
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("user");
@@ -46,7 +53,6 @@ const Navbar = ({ user, setUser }) => {
             {isEn ? 'Switch Language (EN)' : 'Switch Language (IN)'}
           </button>
           
-          {/* MOBILE LOGIN/LOGOUT LOGIC */}
           {user ? (
             <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleLogout}>Log Out</button>
           ) : (
@@ -58,28 +64,52 @@ const Navbar = ({ user, setUser }) => {
       </div>
 
       <header>
-        <div className="container">
-          <nav>
-            <Link to="/" className="logo">
-              <div className="logo-icon"><i className="fa-solid fa-code"></i></div>
-              <span style={{ background: 'linear-gradient(to right, var(--text-main), var(--primary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Upskill<span style={{ color: 'var(--primary)' }}>.pro</span>
-              </span>
-            </Link>
-
-            <div className="search-container">
-              <i className="fa-solid fa-search search-icon"></i>
-              <input type="text" placeholder="Type to search courses..." />
+        {/* FLUID CONTAINER WRAPPER
+            - width: 100% ensures it covers the screen.
+            - maxWidth: 1800px ensures it doesn't stretch too far on ultrawide monitors.
+            - padding: 0 50px gives it that premium "breathing room" from the edges. 
+            - margin: 0 auto keeps it centered on huge screens.
+        */}
+        <div style={{ width: '100%', maxWidth: '1800px', margin: '0 auto', padding: '0 50px', height: '100%' }}>
+          
+          <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
+            
+            {/* --- LEFT SECTION --- */}
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', minWidth: '150px' }}>
+              <Link to="/" className="logo">
+                <div className="logo-icon"><i className="fa-solid fa-code"></i></div>
+                <span style={{ background: 'linear-gradient(to right, var(--text-main), var(--primary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap' }}>
+                  Upskill<span style={{ color: 'var(--primary)' }}>.pro</span>
+                </span>
+              </Link>
             </div>
 
-            <ul className="nav-center">
-              <li><Link to="/courses" className="nav-link">Courses</Link></li>
-              <li><Link to="/quizzes" className="nav-link">Quizzes</Link></li>
-              <li><Link to="/internships" className="nav-link">Internships</Link></li>
-              <li><Link to="/blog" className="nav-link">Blog</Link></li>
-            </ul>
+            {/* --- MIDDLE SECTION --- */}
+            <div className="nav-middle" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+              <form className="search-container" onSubmit={handleSearch}>
+                <i 
+                  className="fa-solid fa-search search-icon" 
+                  onClick={handleSearch} 
+                  style={{cursor: 'pointer'}}
+                ></i>
+                <input 
+                  type="text" 
+                  placeholder="Type to search..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </form>
 
-            <div className="flex-center desktop-actions" style={{ gap: '12px' }}>
+              <ul className="nav-center" style={{ gap: '1rem' }}>
+                <li><Link to="/courses" className="nav-link">Courses</Link></li>
+                <li><Link to="/quizzes" className="nav-link">Quizzes</Link></li>
+                <li><Link to="/internships" className="nav-link">Internships</Link></li>
+                <li><Link to="/blog" className="nav-link">Blog</Link></li>
+              </ul>
+            </div>
+
+            {/* --- RIGHT SECTION --- */}
+            <div className="desktop-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px' }}>
               <button 
                 className="btn-secondary" 
                 style={{ padding: 0, borderRadius: '50%', width: '44px', height: '44px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
@@ -93,21 +123,20 @@ const Navbar = ({ user, setUser }) => {
                 <div className="knob"></div>
               </div>
               
-              {/* DESKTOP LOGIN/LOGOUT LOGIC */}
               {user ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                    {user.picture && (
                      <img 
                        src={user.picture} 
                        alt="Profile" 
-                       style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--primary)' }} 
+                       style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--primary)', objectFit: 'cover' }} 
                      />
                    )}
-                   <button className="btn btn-primary" onClick={handleLogout}>Log Out</button>
+                   <button className="btn btn-primary" onClick={handleLogout} style={{ padding: '10px 24px' }}>Log Out</button>
                 </div>
               ) : (
                 <Link to="/login">
-                    <button className="btn btn-primary">Log In</button>
+                    <button className="btn btn-primary" style={{ padding: '10px 24px' }}>Log In</button>
                 </Link>
               )}
             </div>
