@@ -10,32 +10,34 @@ import Blog from './pages/Blog';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword'; // ✅ Added this import
+import ApplicationFormPage from './pages/ApplicationFormPage';
 import './App.css';
 
 function Layout({ user, setUser }) {
   const location = useLocation();
-  
-  // ✅ Updated to include "/forgot-password" so the Navbar/Footer stays hidden there too
-  const hideLayout = ["/login", "/signup", "/forgot-password"].includes(location.pathname);
+
+  // ✅ Updated to include "/forgot-password" and "/apply" so the Navbar/Footer stays hidden there
+  const hideLayout = ["/login", "/signup", "/forgot-password", "/apply"].includes(location.pathname);
 
   return (
     <>
       {/* Passes user state to Navbar to toggle between "Log In" and "Log Out" */}
       {!hideLayout && <Navbar user={user} setUser={setUser} />}
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/internships" element={<Internships />} />
         <Route path="/quizzes" element={<Quizzes />} />
         <Route path="/blog" element={<Blog />} />
-        
+
         {/* Auth Routes: All three pass setUser to handle the login logic */}
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/apply" element={<ApplicationFormPage />} />
       </Routes>
-      
+
       {!hideLayout && <Footer />}
     </>
   );
