@@ -6,59 +6,73 @@ const CodePen = ({ initialHtml = '', initialCss = '', initialJs = '', autoRun = 
     const [css, setCss] = useState(initialCss);
     const [js, setJs] = useState(initialJs);
     const [activeTab, setActiveTab] = useState('html');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isRunning, setIsRunning] = useState(false);
     const iframeRef = useRef(null);
 
     const runCode = useCallback(() => {
-        const iframe = iframeRef.current;
-        if (!iframe) return;
+        // Prevent multiple rapid clicks (debouncing)
+        if (isRunning) return;
 
-        const document = iframe.contentDocument || iframe.contentWindow.document;
+        setIsRunning(true);
+        setIsLoading(true);
 
-        const code = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
-                    body {
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        padding: 20px;
-                    }
-                    ${css}
-                </style>
-            </head>
-            <body>
-                ${html}
-                <script>
-                    try {
-                        ${js}
-                    } catch (error) {
-                        document.body.innerHTML += '<div style="color: red; padding: 20px; background: #ffebee; border-radius: 8px; margin-top: 20px;"><strong>Error:</strong> ' + error.message + '</div>';
-                        console.error(error);
-                    }
-                </script>
-            </body>
-            </html>
-        `;
+        // Simulate compilation/execution time with professional loading state
+        setTimeout(() => {
+            const code = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            padding: 20px;
+                            background: #ffffff;
+                        }
+                        ${css}
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                    <script>
+                        try {
+                            ${js}
+                        } catch (error) {
+                            document.body.innerHTML += '<div style="color: #d32f2f; padding: 20px; background: #ffebee; border-radius: 8px; margin-top: 20px; border-left: 4px solid #d32f2f;"><strong>❌ Error:</strong> ' + error.message + '</div>';
+                            console.error(error);
+                        }
+                    </script>
+                </body>
+                </html>
+            `;
 
-        document.open();
-        document.write(code);
-        document.close();
-    }, [html, css, js]);
+            // Use srcdoc for better security and performance
+            if (iframeRef.current) {
+                iframeRef.current.srcdoc = code;
+            }
+
+            // Wait for iframe to load, then hide loading with smooth transition
+            setTimeout(() => {
+                setIsLoading(false);
+                setIsRunning(false);
+            }, 300);
+        }, 800); // Professional loading delay: 800ms
+    }, [html, css, js, isRunning]);
 
     // Auto-run on mount and when auto-run is enabled
     useEffect(() => {
-        if (autoRun) {
+        if (autoRun && !isRunning) {
             const timeoutId = setTimeout(runCode, 500);
             return () => clearTimeout(timeoutId);
         }
-    }, [html, css, js, autoRun, runCode]);
+    }, [html, css, js, autoRun, runCode, isRunning]);
 
     const tabs = [
         { id: 'html', label: 'HTML', icon: '🌐' },
@@ -82,9 +96,13 @@ const CodePen = ({ initialHtml = '', initialCss = '', initialJs = '', autoRun = 
                             </button>
                         ))}
                     </div>
-                    <button className="run-button" onClick={runCode}>
-                        <span className="run-icon">▶</span>
-                        Run
+                    <button
+                        className={`run-button ${isRunning ? 'running' : ''}`}
+                        onClick={runCode}
+                        disabled={isRunning}
+                    >
+                        <span className="run-icon">{isRunning ? '⏸' : '▶'}</span>
+                        {isRunning ? 'Running...' : 'Run'}
                     </button>
                 </div>
 
@@ -127,14 +145,30 @@ const CodePen = ({ initialHtml = '', initialCss = '', initialJs = '', autoRun = 
                         <span className="preview-icon">👁️</span>
                         Live Preview
                     </span>
+                    {isLoading && (
+                        <span className="preview-status">
+                            <span className="status-dot"></span>
+                            Compiling...
+                        </span>
+                    )}
                 </div>
-                <iframe
-                    ref={iframeRef}
-                    className="preview-frame"
-                    title="Output"
-                    sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
-                    frameBorder="0"
-                />
+                <div className="preview-body">
+                    {isLoading && (
+                        <div className="loading-overlay">
+                            <div className="spinner-container">
+                                <div className="spinner"></div>
+                                <p className="loading-text">Compiling Code...</p>
+                            </div>
+                        </div>
+                    )}
+                    <iframe
+                        ref={iframeRef}
+                        className={`preview-frame ${isLoading ? 'loading' : ''}`}
+                        title="Output"
+                        sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
+                        frameBorder="0"
+                    />
+                </div>
             </div>
         </div>
     );

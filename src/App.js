@@ -10,6 +10,9 @@ import Blog from './pages/Blog';
 import Login from './pages/Login';
 import MasterTechSkills from './pages/MasterTechSkills';
 import CodePenDemo from './pages/CodePenDemo';
+import LiveCodeEditorDemo from './pages/LiveCodeEditorDemo';
+import LiveCodeEditorProDemo from './pages/LiveCodeEditorProDemo';
+import UltimateEditorDemo from './pages/UltimateEditorDemo';
 import './App.css';
 
 function App() {
@@ -26,6 +29,9 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/login" element={<Login />} />
           <Route path="/codepen" element={<CodePenDemo />} />
+          <Route path="/live-editor" element={<LiveCodeEditorDemo />} />
+          <Route path="/monaco-editor" element={<LiveCodeEditorProDemo />} />
+          <Route path="/ultimate-editor" element={<UltimateEditorDemo />} />
         </Routes>
         <Footer />
       </div>

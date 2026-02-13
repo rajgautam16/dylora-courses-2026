@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Quizzes.css';
+import './quiz-navigation.css';
+import './code-editor-loading.css';
 
 const Quizzes = () => {
     const [selectedQuiz, setSelectedQuiz] = useState(null);
@@ -10,10 +12,13 @@ const Quizzes = () => {
     const [codeOutput, setCodeOutput] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [stats, setStats] = useState({ questions: 0, topics: 0, learners: 0 });
-    const [scrollElements, setScrollElements] = useState([]);
     const [editableCode, setEditableCode] = useState('');
-    const sectionsRef = useRef({});
+    const [userAnswers, setUserAnswers] = useState([]);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [isCodeRunning, setIsCodeRunning] = useState(false);
+    const [isCodeLoading, setIsCodeLoading] = useState(false);
     const iframeRef = useRef(null);
+    const questionRef = useRef(null);
 
     const staticStats = [
         { number: '500+', label: 'Quiz Questions' },
@@ -186,8 +191,8 @@ document.addEventListener('click', () => {
     }, [selectedQuiz]);
 
     // Filter quizzes by category
-    const filteredQuizzes = selectedCategory === 'All' 
-        ? quizzes 
+    const filteredQuizzes = selectedCategory === 'All'
+        ? quizzes
         : quizzes.filter(quiz => quiz.category === selectedCategory);
 
     const handleStartQuiz = (quiz) => {
@@ -197,57 +202,120 @@ document.addEventListener('click', () => {
         setShowResult(false);
         setCodeOutput(quiz.code);
         setEditableCode(quiz.code);
+        setUserAnswers(new Array(quiz.questions.length).fill(null));
+        setSelectedAnswer(null);
     };
 
     const handleAnswerClick = (optionIndex) => {
-        if (optionIndex === selectedQuiz.questions[currentQuestion].correct) {
-            setScore(score + 1);
+        // Save the selected answer
+        const newAnswers = [...userAnswers];
+        newAnswers[currentQuestion] = optionIndex;
+        setUserAnswers(newAnswers);
+        setSelectedAnswer(optionIndex);
+    };
+
+    const handleNextQuestion = () => {
+        // Scroll to top smoothly
+        if (questionRef.current) {
+            questionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        
+
+        // Move to next question
         if (currentQuestion + 1 < selectedQuiz.questions.length) {
             setCurrentQuestion(currentQuestion + 1);
-        } else {
-            setShowResult(true);
+            setSelectedAnswer(userAnswers[currentQuestion + 1]);
         }
+    };
+
+    const handlePreviousQuestion = () => {
+        // Scroll to top smoothly
+        if (questionRef.current) {
+            questionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Move to previous question
+        if (currentQuestion > 0) {
+            setCurrentQuestion(currentQuestion - 1);
+            setSelectedAnswer(userAnswers[currentQuestion - 1]);
+        }
+    };
+
+    const handleSubmitQuiz = () => {
+        // Calculate score based on saved answers
+        let finalScore = 0;
+        userAnswers.forEach((answer, index) => {
+            if (answer === selectedQuiz.questions[index].correct) {
+                finalScore++;
+            }
+        });
+        setScore(finalScore);
+        setShowResult(true);
     };
 
     const handleRetryQuiz = () => {
         setCurrentQuestion(0);
         setScore(0);
         setShowResult(false);
+        setUserAnswers(new Array(selectedQuiz.questions.length).fill(null));
+        setSelectedAnswer(null);
     };
 
     const handleRunCode = () => {
-        try {
-            if (selectedQuiz?.id === 1) {
-                // HTML - render in iframe
-                if (iframeRef.current) {
-                    try {
-                        const iframe = iframeRef.current;
-                        const doc = iframe.contentWindow.document;
-                        
-                        doc.open();
-                        doc.write(editableCode);
-                        doc.close();
-                        
-                        setCodeOutput('✓ HTML rendered!');
-                    } catch (err) {
-                        console.error('HTML Error:', err);
-                        setCodeOutput(`Error: ${err.message}`);
+        // Prevent multiple rapid clicks
+        if (isCodeRunning) return;
+
+        setIsCodeRunning(true);
+        setIsCodeLoading(true);
+        setCodeOutput('');
+
+        // Professional loading delay (800ms)
+        setTimeout(() => {
+            try {
+                if (selectedQuiz?.id === 1) {
+                    // HTML - render using iframe.srcDoc
+                    if (iframeRef.current) {
+                        try {
+                            const htmlCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    ${editableCode}
+</body>
+</html>`;
+
+                            iframeRef.current.srcdoc = htmlCode;
+                            setCodeOutput('✓ HTML rendered!');
+                        } catch (err) {
+                            console.error('HTML Error:', err);
+                            setCodeOutput(`❌ Error: ${err.message}`);
+                        }
                     }
-                }
-            } else if (selectedQuiz?.id === 2) {
-                // CSS - render with HTML in iframe
-                if (iframeRef.current) {
-                    try {
-                        const fullHTML = `<!DOCTYPE html>
-<html>
+                } else if (selectedQuiz?.id === 2) {
+                    // CSS - render using iframe.srcDoc
+                    if (iframeRef.current) {
+                        try {
+                            const cssCode = `<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        body {
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
         ${editableCode}
     </style>
 </head>
@@ -258,63 +326,97 @@ document.addEventListener('click', () => {
     <div class="box">Styled Box</div>
 </body>
 </html>`;
-                        
-                        const iframe = iframeRef.current;
-                        const doc = iframe.contentWindow.document;
-                        
-                        doc.open();
-                        doc.write(fullHTML);
-                        doc.close();
-                        
-                        setCodeOutput('✓ CSS applied!');
-                    } catch (err) {
-                        console.error('CSS Error:', err);
-                        setCodeOutput(`Error: ${err.message}`);
+
+                            iframeRef.current.srcdoc = cssCode;
+                            setCodeOutput('✓ CSS applied!');
+                        } catch (err) {
+                            console.error('CSS Error:', err);
+                            setCodeOutput(`❌ Error: ${err.message}`);
+                        }
                     }
-                }
-            } else {
-                // JavaScript - capture console output
-                const logs = [];
-                const originalLog = console.log;
-                const originalError = console.error;
-                const originalWarn = console.warn;
-                
-                console.log = (...args) => {
-                    logs.push(args.map(arg => 
-                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-                    ).join(' '));
-                    originalLog(...args);
-                };
-                
-                console.error = (...args) => {
-                    logs.push('❌ ERROR: ' + args.map(arg => 
-                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-                    ).join(' '));
-                    originalError(...args);
-                };
-                
-                console.warn = (...args) => {
-                    logs.push('⚠️ WARNING: ' + args.join(' '));
-                    originalWarn(...args);
-                };
-                
-                try {
-                    eval(editableCode);
-                    console.log = originalLog;
-                    console.error = originalError;
-                    console.warn = originalWarn;
-                    
-                    setCodeOutput(logs.length > 0 ? logs.join('\n') : '✓ Code executed!\n(No console output)');
-                } catch (error) {
-                    console.log = originalLog;
-                    console.error = originalError;
-                    console.warn = originalWarn;
-                    setCodeOutput(`❌ Error: ${error.message}`);
-                }
+                } else if (selectedQuiz?.id === 3) {
+                    // JavaScript - execute with console capture using iframe.srcDoc
+                    if (iframeRef.current) {
+                        try {
+                            const jsCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log { padding: 5px 0; }
+        .error { color: #f48771; }
+        .warn { color: #dcdcaa; }
+    </style>
+</head>
+<body>
+    <div id="console"></div>
+    <script>
+        const consoleDiv = document.getElementById('console');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        console.log = function(...args) {
+            const line = document.createElement('div');
+            line.className = 'log';
+            line.textContent = '▶ ' + args.join(' ');
+            consoleDiv.appendChild(line);
+            originalLog.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            const line = document.createElement('div');
+            line.className = 'log error';
+            line.textContent = '❌ ' + args.join(' ');
+            consoleDiv.appendChild(line);
+            originalError.apply(console, args);
+        };
+
+        console.warn = function(...args) {
+            const line = document.createElement('div');
+            line.className = 'log warn';
+            line.textContent = '⚠️ ' + args.join(' ');
+            consoleDiv.appendChild(line);
+            originalWarn.apply(console, args);
+        };
+
+        try {
+            ${editableCode}
+            if (consoleDiv.children.length === 0) {
+                console.log('Code executed successfully!');
             }
         } catch (error) {
-            setCodeOutput(`Fatal Error: ${error.message}`);
+            console.error(error.message);
         }
+    </script>
+</body>
+</html>`;
+
+                            iframeRef.current.srcdoc = jsCode;
+                            setCodeOutput('✓ JavaScript executed!');
+                        } catch (err) {
+                            console.error('JS Error:', err);
+                            setCodeOutput(`❌ Error: ${err.message}`);
+                        }
+                    }
+                }
+            } catch (error) {
+                setCodeOutput(`❌ Fatal Error: ${error.message}`);
+            }
+
+            // Hide loading after execution
+            setTimeout(() => {
+                setIsCodeLoading(false);
+                setIsCodeRunning(false);
+            }, 300);
+        }, 800);
     };
 
     const handleBackToQuizzes = () => {
@@ -334,14 +436,14 @@ document.addEventListener('click', () => {
                 </div>
 
                 {!showResult ? (
-                    <div className="quiz-wrapper">
+                    <div className="quiz-wrapper" ref={questionRef}>
                         <div className="quiz-container">
                             <div className="quiz-header">
                                 <h2>{selectedQuiz.title}</h2>
                                 <div className="quiz-progress">
                                     <div className="progress-bar">
-                                        <div 
-                                            className="progress-fill" 
+                                        <div
+                                            className="progress-fill"
                                             style={{ width: `${((currentQuestion + 1) / selectedQuiz.questions.length) * 100}%` }}
                                         ></div>
                                     </div>
@@ -360,13 +462,46 @@ document.addEventListener('click', () => {
                                     {selectedQuiz.questions[currentQuestion].options.map((option, index) => (
                                         <button
                                             key={index}
-                                            className="option-btn"
+                                            className={`option-btn ${selectedAnswer === index ? 'selected' : ''
+                                                }`}
                                             onClick={() => handleAnswerClick(index)}
                                         >
                                             <span className="option-letter">{String.fromCharCode(65 + index)}</span>
                                             <span className="option-text">{option}</span>
                                         </button>
                                     ))}
+                                </div>
+
+                                {/* Navigation Buttons */}
+                                <div className="quiz-navigation-buttons">
+                                    <button
+                                        className="nav-btn prev-btn"
+                                        onClick={handlePreviousQuestion}
+                                        disabled={currentQuestion === 0}
+                                    >
+                                        <span className="nav-icon">←</span>
+                                        Previous
+                                    </button>
+
+                                    {currentQuestion === selectedQuiz.questions.length - 1 ? (
+                                        <button
+                                            className="nav-btn submit-btn"
+                                            onClick={handleSubmitQuiz}
+                                            disabled={userAnswers.some(answer => answer === null)}
+                                        >
+                                            Submit Quiz
+                                            <span className="nav-icon">✓</span>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="nav-btn next-btn"
+                                            onClick={handleNextQuestion}
+                                            disabled={currentQuestion === selectedQuiz.questions.length - 1}
+                                        >
+                                            Next
+                                            <span className="nav-icon">→</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -377,40 +512,62 @@ document.addEventListener('click', () => {
                                 <h3>🚀 Try It Yourself</h3>
                                 <p>Edit the code and see the results instantly!</p>
                             </div>
-                            
+
                             <div className="editor-container">
                                 <div className="editor-header">
                                     <h3>CODE EDITOR</h3>
-                                    <button className="run-btn" onClick={handleRunCode}>
-                                        ▶ Run
+                                    <button
+                                        className={`run-btn ${isCodeRunning ? 'running' : ''}`}
+                                        onClick={handleRunCode}
+                                        disabled={isCodeRunning}
+                                    >
+                                        <span className="run-icon">{isCodeRunning ? '⏸' : '▶'}</span>
+                                        {isCodeRunning ? 'Running...' : 'Run'}
                                     </button>
                                 </div>
-                                
+
                                 <div className="editor-content">
                                     <div className="code-input">
-                                        <textarea 
+                                        <textarea
                                             className="code-textarea"
                                             value={editableCode}
                                             onChange={(e) => setEditableCode(e.target.value)}
                                             spellCheck="false"
                                         />
                                     </div>
-                                    
+
                                     <div className="code-output">
                                         <div className="output-header">OUTPUT</div>
+
+                                        {/* Loading Overlay */}
+                                        {isCodeLoading && (
+                                            <div className="code-loading-overlay">
+                                                <div className="code-spinner"></div>
+                                                <p className="loading-text">Compiling Code...</p>
+                                            </div>
+                                        )}
+
                                         {selectedQuiz.id === 1 || selectedQuiz.id === 2 ? (
-                                            <iframe 
+                                            <iframe
                                                 key={`iframe-${selectedQuiz.id}-${currentQuestion}`}
                                                 ref={iframeRef}
-                                                className="output-iframe"
+                                                className={`output-iframe ${isCodeLoading ? 'loading' : ''}`}
                                                 title="Code Output"
-                                                sandbox="allow-scripts"
+                                                sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
                                                 frameBorder="0"
-                                                allowFullScreen
+                                            />
+                                        ) : selectedQuiz.id === 3 ? (
+                                            <iframe
+                                                key={`iframe-js-${selectedQuiz.id}-${currentQuestion}`}
+                                                ref={iframeRef}
+                                                className={`output-iframe ${isCodeLoading ? 'loading' : ''}`}
+                                                title="JavaScript Output"
+                                                sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
+                                                frameBorder="0"
                                             />
                                         ) : (
                                             <div className="javascript-output">
-                                                <pre><code>{codeOutput || 'Click Run to execute JavaScript'}</code></pre>
+                                                <pre><code>{codeOutput || 'Click Run to execute code'}</code></pre>
                                             </div>
                                         )}
                                     </div>
@@ -430,13 +587,13 @@ document.addEventListener('click', () => {
 
                             <h2>Quiz Completed!</h2>
                             <p className="result-message">
-                                {score === selectedQuiz.questions.length 
-                                    ? '🎉 Perfect Score! You\'re a master!' 
-                                    : score >= selectedQuiz.questions.length * 0.8 
-                                    ? '🌟 Great Job! Almost there!'
-                                    : score >= selectedQuiz.questions.length * 0.6
-                                    ? '👍 Good Effort! Keep practicing!'
-                                    : '💪 Keep practicing, you\'ll get better!'}
+                                {score === selectedQuiz.questions.length
+                                    ? '🎉 Perfect Score! You\'re a master!'
+                                    : score >= selectedQuiz.questions.length * 0.8
+                                        ? '🌟 Great Job! Almost there!'
+                                        : score >= selectedQuiz.questions.length * 0.6
+                                            ? '👍 Good Effort! Keep practicing!'
+                                            : '💪 Keep practicing, you\'ll get better!'}
                             </p>
 
                             <div className="result-stats">
@@ -488,20 +645,20 @@ document.addEventListener('click', () => {
                     </p>
                 </div>
 
-            {/* Stats Section */}
-            <div className="quizzes-stats scroll-reveal">
-                {[
-                    { number: stats.questions, label: 'Quiz Questions', icon: '❓' },
-                    { number: stats.topics, label: 'Quiz Topics', icon: '📚' },
-                    { number: stats.learners, label: 'Daily Participants', icon: '👥' }
-                ].map((stat, index) => (
-                    <div key={index} className="quizzes-stat-card stat-card-hover">
-                        <div className="stat-icon">{stat.icon}</div>
-                        <div className="stat-number animated-number">{stat.number}+</div>
-                        <div className="stat-label">{stat.label}</div>
-                    </div>
-                ))}
-            </div>
+                {/* Stats Section */}
+                <div className="quizzes-stats scroll-reveal">
+                    {[
+                        { number: stats.questions, label: 'Quiz Questions', icon: '❓' },
+                        { number: stats.topics, label: 'Quiz Topics', icon: '📚' },
+                        { number: stats.learners, label: 'Daily Participants', icon: '👥' }
+                    ].map((stat, index) => (
+                        <div key={index} className="quizzes-stat-card stat-card-hover">
+                            <div className="stat-icon">{stat.icon}</div>
+                            <div className="stat-number animated-number">{stat.number}+</div>
+                            <div className="stat-label">{stat.label}</div>
+                        </div>
+                    ))}
+                </div>
             </section>
 
             {/* Quizzes Grid Section */}
@@ -532,16 +689,16 @@ document.addEventListener('click', () => {
                                     <div className="quiz-icon">{quiz.icon}</div>
                                     <span className="quiz-difficulty">{quiz.difficulty}</span>
                                 </div>
-                                
+
                                 <h3 className="quiz-card-title">{quiz.title}</h3>
                                 <p className="quiz-card-description">{quiz.description}</p>
-                                
+
                                 <div className="quiz-info">
                                     <span className="quiz-category">📚 {quiz.category}</span>
                                     <span className="quiz-count">❓ {quiz.questions.length} Questions</span>
                                 </div>
-                                
-                                <button 
+
+                                <button
                                     className="quiz-start-btn"
                                     onClick={() => handleStartQuiz(quiz)}
                                 >
