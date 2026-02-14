@@ -1000,7 +1000,7 @@ button,
 [data-theme="dark"] .profile-dropdown-tab {
   background: rgba(30, 20, 50, 0.9);
   border-color: rgba(255, 255, 255, 0.1);
-<<<<<<< HEAD
+
 }
 .profile-grid {
   display: grid;
@@ -1258,10 +1258,10 @@ button,
 }
 
 .primary-btn-sm:hover { opacity: 0.9; transform: translateY(-2px); }
-=======
+
 .nav-middle {
   display: flex;
   align-items: center;
   gap: 2rem; /* Spacing between Search and Links */
 }
->>>>>>> 4cd832ae41911c95e703af4c2f13218a088a3f93
+

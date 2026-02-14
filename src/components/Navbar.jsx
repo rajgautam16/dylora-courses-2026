@@ -7,12 +7,10 @@ const Navbar = ({ user, setUser }) => {
   const [isEn, setIsEn] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
-<<<<<<< HEAD
-  const dropdownRef = useRef(null);
-=======
   const dropdownRef = useRef(null); 
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Search Logic
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
@@ -20,8 +18,8 @@ const Navbar = ({ user, setUser }) => {
       setSearchTerm('');
     }
   };
->>>>>>> 4cd832ae41911c95e703af4c2f13218a088a3f93
 
+  // Toggle Theme
   useEffect(() => {
     document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
@@ -50,8 +48,10 @@ const Navbar = ({ user, setUser }) => {
 
   return (
     <>
+      {/* Mobile Menu Overlay */}
       <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`} onClick={toggleMobileMenu}></div>
       
+      {/* Mobile Menu Sidebar */}
       <div className={`mobile-menu-container ${isMobileMenuOpen ? 'active' : ''}`} id="mobile-menu">
         <div className="mobile-menu-header">
           <span style={{ fontWeight: 800, fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>Menu</span>
@@ -82,17 +82,10 @@ const Navbar = ({ user, setUser }) => {
       </div>
 
       <header>
-        {/* FLUID CONTAINER WRAPPER
-            - width: 100% ensures it covers the screen.
-            - maxWidth: 1800px ensures it doesn't stretch too far on ultrawide monitors.
-            - padding: 0 50px gives it that premium "breathing room" from the edges. 
-            - margin: 0 auto keeps it centered on huge screens.
-        */}
         <div style={{ width: '100%', maxWidth: '1800px', margin: '0 auto', padding: '0 50px', height: '100%' }}>
-          
           <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
             
-            {/* --- LEFT SECTION --- */}
+            {/* Left: Logo */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', minWidth: '150px' }}>
               <Link to="/" className="logo">
                 <div className="logo-icon"><i className="fa-solid fa-code"></i></div>
@@ -102,14 +95,10 @@ const Navbar = ({ user, setUser }) => {
               </Link>
             </div>
 
-            {/* --- MIDDLE SECTION --- */}
+            {/* Middle: Search and Links */}
             <div className="nav-middle" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
               <form className="search-container" onSubmit={handleSearch}>
-                <i 
-                  className="fa-solid fa-search search-icon" 
-                  onClick={handleSearch} 
-                  style={{cursor: 'pointer'}}
-                ></i>
+                <i className="fa-solid fa-search search-icon" onClick={handleSearch} style={{cursor: 'pointer'}}></i>
                 <input 
                   type="text" 
                   placeholder="Type to search..." 
@@ -126,13 +115,9 @@ const Navbar = ({ user, setUser }) => {
               </ul>
             </div>
 
-            {/* --- RIGHT SECTION --- */}
+            {/* Right: Actions and Profile */}
             <div className="desktop-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px' }}>
-              <button 
-                className="btn-secondary" 
-                style={{ padding: 0, borderRadius: '50%', width: '44px', height: '44px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
-                onClick={toggleLang}
-              >
+              <button className="btn-secondary" style={{ padding: 0, borderRadius: '50%', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={toggleLang}>
                 {isEn ? 'EN' : 'IN'}
               </button>
               
@@ -143,41 +128,15 @@ const Navbar = ({ user, setUser }) => {
               
               {user ? (
                 <div style={{ position: 'relative' }} ref={dropdownRef}>
-                  <img 
-                    src={user.picture} 
-                    alt="Profile" 
-                    onClick={() => setShowDropdown(!showDropdown)} 
-                    style={{ 
-                      width: '40px', 
-                      height: '40px', 
-                      borderRadius: '50%', 
-                      border: '2px solid var(--primary)', 
-                      cursor: 'pointer',
-                      display: 'block' 
-                    }} 
-                  />
-
+                  <img src={user.picture} alt="Profile" onClick={() => setShowDropdown(!showDropdown)} style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--primary)', cursor: 'pointer', objectFit: 'cover' }} />
                   {showDropdown && (
-                    <div className="profile-dropdown-tab" style={{
-                      position: 'absolute',
-                      top: '55px',
-                      right: '0',
-                      width: '220px',
-                      backgroundColor: 'var(--bg-surface)',
-                      backdropFilter: 'blur(20px)',
-                      boxShadow: 'var(--shadow-xl)',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      zIndex: '1100',
-                      border: '1px solid var(--border)'
-                    }}>
+                    <div className="profile-dropdown-tab" style={{ position: 'absolute', top: '55px', right: '0', width: '220px', backgroundColor: 'var(--bg-surface)', backdropFilter: 'blur(20px)', borderRadius: '12px', padding: '12px', zIndex: '1100', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)' }}>
                       <div style={{ padding: '8px 12px', fontSize: '0.85rem' }}>
                         <span style={{ color: 'var(--text-muted)' }}>Signed in as</span> <br />
                         <strong style={{ color: 'var(--text-main)' }}>{user.name}</strong>
                       </div>
                       <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
                       
-                      {/* LINKED TO PROFILE PAGE SECTIONS */}
                       <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
                         <i className="fa-solid fa-user-gear" style={{ marginRight: '10px' }}></i> Edit Profile
                       </Link>
@@ -185,55 +144,24 @@ const Navbar = ({ user, setUser }) => {
                       <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
                         <i className="fa-solid fa-briefcase" style={{ marginRight: '10px' }}></i> Internships
                       </Link>
-                      
+
                       <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
                         <i className="fa-solid fa-graduation-cap" style={{ marginRight: '10px' }}></i> My Courses
                       </Link>
-                      
+
                       <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
                         <i className="fa-solid fa-trophy" style={{ marginRight: '10px' }}></i> Quiz Stats
                       </Link>
                       
                       <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
-                      
-                      <button 
-                        onClick={handleLogout}
-                        style={{
-                          width: '100%',
-                          textAlign: 'left',
-                          padding: '10px 12px',
-                          background: 'none',
-                          border: 'none',
-                          color: '#ff4d4d',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px'
-                        }}
-                      >
+                      <button onClick={handleLogout} style={{ width: '100%', textAlign: 'left', padding: '10px 12px', background: 'none', border: 'none', color: '#ff4d4d', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <i className="fa-solid fa-right-from-bracket"></i> Log Out
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
-                <Link to="/login">
-                  <button className="btn btn-primary">Log In</button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                   {user.picture && (
-                     <img 
-                       src={user.picture} 
-                       alt="Profile" 
-                       style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--primary)', objectFit: 'cover' }} 
-                     />
-                   )}
-                   <button className="btn btn-primary" onClick={handleLogout} style={{ padding: '10px 24px' }}>Log Out</button>
-                </div>
-              ) : (
-                <Link to="/login">
-                    <button className="btn btn-primary" style={{ padding: '10px 24px' }}>Log In</button>
-                </Link>
+                <Link to="/login"><button className="btn btn-primary">Log In</button></Link>
               )}
             </div>
 
