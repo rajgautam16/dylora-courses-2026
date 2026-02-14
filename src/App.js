@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword'; // ✅ Added this import
 import ApplicationFormPage from './pages/ApplicationFormPage';
+import Search from './pages/Search';
 import './App.css';
 
 function Layout({ user, setUser }) {
@@ -26,6 +27,7 @@ function Layout({ user, setUser }) {
 
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/internships" element={<Internships />} />
         <Route path="/quizzes" element={<Quizzes />} />

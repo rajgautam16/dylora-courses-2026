@@ -260,12 +260,36 @@ const Home = () => {
                         <div className="lms-content">
                             <span className="section-tag" style={{ marginBottom: '15px' }}>Module 3</span>
                             <h2 style={{ fontSize: '2rem', marginBottom: '25px' }}>Understanding Neural Networks</h2>
-                            <div className="video-placeholder">
-                                <div style={{ width: '80px', height: '80px', background: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', cursor: 'pointer', transition: '0.3s', border: '1px solid rgba(255,255,255,0.4)' }}>
-                                    <i className="fa-solid fa-play" style={{ fontSize: '1.5rem', marginLeft: '5px', background: 'white', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}></i>
-                                </div>
+                            
+                            {/* --- VIDEO PLAYER START --- */}
+                           <div className="video-placeholder" style={{ 
+                                borderRadius: '12px', /* Reduced radius to stop cutting corners */
+                                overflow: 'hidden', 
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.3)', 
+                                display: 'flex',       /* Flexbox forces the video to fit perfectly without gaps */
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                background: '#000',     /* Black bg to hide any tiny edges */
+                                width: '100%'
+                            }}>
+                                <video 
+                                    controls 
+                                    poster="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1000&q=80"
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%',     /* Let height adjust automatically */
+                                        display: 'block',   /* Removes inline spacing */
+                                        maxHeight: '600px'  /* Optional: prevents it from getting too tall on huge screens */
+                                    }}
+                                >
+                                    {/* Make sure this is a direct link to an .mp4 file, NOT a YouTube link */}
+                                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
                             </div>
-                            <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', fontSize: '1.1rem' }}>
+                            {/* --- VIDEO PLAYER END --- */}
+
+                            <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', fontSize: '1.1rem', marginTop: '30px' }}>
                                 In this module, we will dive deep into the architecture of a basic neural network. You will learn about neurons, layers, weights, and biases through interactive visualizations.
                             </p>
                             <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '25px' }}>
