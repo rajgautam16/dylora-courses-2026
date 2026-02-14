@@ -29,7 +29,7 @@
   --radius-lg: 30px;
   
   --font-main: 'Outfit', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
+  --font-display: 'Outfit', sans-serif; /*was Space Grotesk*/
   --font-code: 'Fira Code', monospace;
 }
 
@@ -258,7 +258,7 @@ nav { height: 100%; display: flex; justify-content: space-between; align-items: 
 .mobile-nav-link:hover { background: rgba(124, 58, 237, 0.05); color: var(--primary); }
 
 @media(max-width: 1024px) { 
-  .nav-center, .search-container, .desktop-actions { display: none; } 
+  .nav-center, .search-container, .desktop-actions, .nav-middle { display: none; } 
   .mobile-toggle { display: block; }
 }
 
@@ -1000,6 +1000,7 @@ button,
 [data-theme="dark"] .profile-dropdown-tab {
   background: rgba(30, 20, 50, 0.9);
   border-color: rgba(255, 255, 255, 0.1);
+<<<<<<< HEAD
 }
 .profile-grid {
   display: grid;
@@ -1257,3 +1258,10 @@ button,
 }
 
 .primary-btn-sm:hover { opacity: 0.9; transform: translateY(-2px); }
+=======
+.nav-middle {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Spacing between Search and Links */
+}
+>>>>>>> 4cd832ae41911c95e703af4c2f13218a088a3f93
