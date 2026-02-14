@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
@@ -13,7 +13,18 @@ const Signup = ({ setUser }) => {
     confirmPassword: ""
   });
   
+  // New state for custom messages
+  const [message, setMessage] = useState({ type: "", text: "" });
+
   const navigate = useNavigate();
+
+  // Clear message after 3 seconds
+  useEffect(() => {
+    if (message.text) {
+      const timer = setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,8 +32,9 @@ const Signup = ({ setUser }) => {
 
   const handleEmailSignup = (e) => {
     e.preventDefault();
+    
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setMessage({ type: "error", text: "Passwords do not match!" });
       return;
     }
 
@@ -34,8 +46,11 @@ const Signup = ({ setUser }) => {
 
     localStorage.setItem("user", JSON.stringify(newUser));
     setUser(newUser);
-    alert("Account created successfully!");
-    navigate("/courses");
+    
+    setMessage({ type: "success", text: "Account created successfully!" });
+    
+    // Delay navigation slightly so they see the success message
+    setTimeout(() => navigate("/courses"), 1500);
   };
 
   return (
@@ -48,6 +63,13 @@ const Signup = ({ setUser }) => {
         <div className="brand">✨ upskill.pro</div>
         <h2>Create Your Account</h2>
         <p className="subtitle">Learn skills. Build career. Get hired.</p>
+
+        {/* Custom Message Display */}
+        {message.text && (
+          <div className={`form-message ${message.type}`}>
+            {message.type === "error" ? "⚠️ " : "✅ "} {message.text}
+          </div>
+        )}
 
         <form onSubmit={handleEmailSignup}>
           <div className="input-group">
@@ -66,9 +88,11 @@ const Signup = ({ setUser }) => {
             <span className="input-icon">🛡️</span>
             <input type="password" name="confirmPassword" placeholder="Confirm Password" required onChange={handleChange} />
           </div>
+          
           <div className="terms" style={{fontSize: '0.8rem', textAlign: 'left', marginBottom: '15px'}}>
             <input type="checkbox" required /> I agree to <b>Terms & Privacy</b>
           </div>
+
           <button type="submit" className="primary-btn">Create Account</button>
         </form>
 
@@ -84,7 +108,7 @@ const Signup = ({ setUser }) => {
             }}
             shape="pill"
             theme={theme === "dark" ? "filled_black" : "outline"}
-            onError={() => alert("Google Signup Failed")}
+            onError={() => setMessage({ type: "error", text: "Google Signup Failed" })}
           />
         </div>
 

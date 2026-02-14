@@ -7,24 +7,35 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [code, setCode] = useState("");
+  const [message, setMessage] = useState({ type: "", text: "" }); // ✅ Added for custom error handling
   const navigate = useNavigate();
 
+  // Handle Requesting the Code
   const handleRequestCode = (e) => {
     e.preventDefault();
     if (email) {
-      alert(`A verification code has been sent to ${email}`);
+      // ✅ Using custom message instead of alert()
+      setMessage({ type: "success", text: `Verification code sent to ${email}` });
       setIsCodeSent(true);
+      
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     }
   };
 
+  // Handle Verifying the Code
   const handleVerifyCode = (e) => {
     e.preventDefault();
-    if (code.length === 6) {
-      alert("Code Verified! You can now reset your password.");
-      // Navigate to actual reset password form or back to login for this demo
-      navigate("/login");
+    
+    // ✅ 6-digit validation logic
+    if (code.length === 6 && /^\d+$/.test(code)) {
+      setMessage({ type: "success", text: "Code Verified! Redirecting to login..." });
+      
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } else {
-      alert("Please enter a valid 6-digit code.");
+      setMessage({ type: "error", text: "Please enter a valid 6-digit numeric code." });
     }
   };
 
@@ -36,6 +47,13 @@ const ForgotPassword = () => {
 
       <div className="auth-card">
         <div className="brand">✨ upskill.pro</div>
+        
+        {/* ✅ Custom Error/Success Message Display */}
+        {message.text && (
+          <div className={`form-message ${message.type}`}>
+            {message.type === "error" ? "⚠️ " : "✅ "} {message.text}
+          </div>
+        )}
         
         {!isCodeSent ? (
           <>
@@ -71,7 +89,10 @@ const ForgotPassword = () => {
               </div>
               <button type="submit" className="primary-btn">Verify & Proceed</button>
               <p className="switch-auth" style={{marginTop: '15px'}}>
-                Didn't get the code? <span onClick={() => setIsCodeSent(false)}>Resend</span>
+                Didn't get the code? <span onClick={() => {
+                  setIsCodeSent(false);
+                  setMessage({ type: "success", text: "You can try entering your email again." });
+                }}>Resend</span>
               </p>
             </form>
           </>

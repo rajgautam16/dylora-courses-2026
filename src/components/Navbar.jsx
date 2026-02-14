@@ -1,25 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = ({ user, setUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isEn, setIsEn] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false); 
   const navigate = useNavigate();
+  const dropdownRef = useRef(null); 
 
   // Toggle Theme
   useEffect(() => {
     document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleTheme = () => setIsDark(!isDark);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleLang = () => setIsEn(!isEn);
 
-  // Logout Function
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    setShowDropdown(false);
     navigate("/login");
   };
 
@@ -46,7 +59,6 @@ const Navbar = ({ user, setUser }) => {
             {isEn ? 'Switch Language (EN)' : 'Switch Language (IN)'}
           </button>
           
-          {/* MOBILE LOGIN/LOGOUT LOGIC */}
           {user ? (
             <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleLogout}>Log Out</button>
           ) : (
@@ -93,21 +105,67 @@ const Navbar = ({ user, setUser }) => {
                 <div className="knob"></div>
               </div>
               
-              {/* DESKTOP LOGIN/LOGOUT LOGIC */}
               {user ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                   {user.picture && (
-                     <img 
-                       src={user.picture} 
-                       alt="Profile" 
-                       style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--primary)' }} 
-                     />
-                   )}
-                   <button className="btn btn-primary" onClick={handleLogout}>Log Out</button>
+                <div style={{ position: 'relative' }} ref={dropdownRef}>
+                  <img 
+                    src={user.picture} 
+                    alt="Profile" 
+                    onClick={() => setShowDropdown(!showDropdown)} 
+                    style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%', 
+                      border: '2px solid var(--primary)', 
+                      cursor: 'pointer',
+                      display: 'block' 
+                    }} 
+                  />
+
+                  {showDropdown && (
+                    <div className="profile-dropdown-tab" style={{
+                      position: 'absolute',
+                      top: '50px',
+                      right: '0',
+                      width: '200px',
+                      backgroundColor: 'var(--bg-card, white)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                      borderRadius: '12px',
+                      padding: '10px',
+                      zIndex: '1000',
+                      border: '1px solid var(--border)'
+                    }}>
+                      <div style={{ padding: '8px 12px', fontSize: '0.85rem', color: '#666' }}>
+                        Signed in as <br /><strong style={{ color: 'var(--text-main)' }}>{user.name}</strong>
+                      </div>
+                      <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
+                      
+                      {/* ✅ REPLACED DASHBOARD WITH INTERNSHIPS */}
+                      <Link to="/internships" className="dropdown-item" onClick={() => setShowDropdown(false)}>💼 Internships</Link>
+                      
+                      <Link to="/courses" className="dropdown-item" onClick={() => setShowDropdown(false)}>📚 My Courses</Link>
+                      <Link to="/quizzes" className="dropdown-item" onClick={() => setShowDropdown(false)}>📝 Quizzes</Link>
+                      <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
+                      <button 
+                        onClick={handleLogout}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '10px 12px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#ff4d4d',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🚪 Log Out
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Link to="/login">
-                    <button className="btn btn-primary">Log In</button>
+                  <button className="btn btn-primary">Log In</button>
                 </Link>
               )}
             </div>
