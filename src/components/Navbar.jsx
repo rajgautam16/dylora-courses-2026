@@ -5,9 +5,9 @@ const Navbar = ({ user, setUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isEn, setIsEn] = useState(true);
-  const [showDropdown, setShowDropdown] = useState(false); 
+  const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
-  const dropdownRef = useRef(null); 
+  const dropdownRef = useRef(null);
 
   // Toggle Theme
   useEffect(() => {
@@ -101,8 +101,8 @@ const Navbar = ({ user, setUser }) => {
               </button>
               
               <div className="theme-switch-wrapper" onClick={toggleTheme} role="button" tabIndex="0">
-                <i className="fa-regular fa-moon icon-bg"></i>
-                <div className="knob"></div>
+                <i className={isDark ? "fa-solid fa-sun icon-bg" : "fa-solid fa-moon icon-bg"}></i>
+                <div className="knob" style={{ transform: isDark ? 'translateX(0px)' : 'translateX(26px)' }}></div>
               </div>
               
               {user ? (
@@ -124,27 +124,42 @@ const Navbar = ({ user, setUser }) => {
                   {showDropdown && (
                     <div className="profile-dropdown-tab" style={{
                       position: 'absolute',
-                      top: '50px',
+                      top: '55px',
                       right: '0',
-                      width: '200px',
-                      backgroundColor: 'var(--bg-card, white)',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                      width: '220px',
+                      backgroundColor: 'var(--bg-surface)',
+                      backdropFilter: 'blur(20px)',
+                      boxShadow: 'var(--shadow-xl)',
                       borderRadius: '12px',
-                      padding: '10px',
-                      zIndex: '1000',
+                      padding: '12px',
+                      zIndex: '1100',
                       border: '1px solid var(--border)'
                     }}>
-                      <div style={{ padding: '8px 12px', fontSize: '0.85rem', color: '#666' }}>
-                        Signed in as <br /><strong style={{ color: 'var(--text-main)' }}>{user.name}</strong>
+                      <div style={{ padding: '8px 12px', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Signed in as</span> <br />
+                        <strong style={{ color: 'var(--text-main)' }}>{user.name}</strong>
                       </div>
                       <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
                       
-                      {/* ✅ REPLACED DASHBOARD WITH INTERNSHIPS */}
-                      <Link to="/internships" className="dropdown-item" onClick={() => setShowDropdown(false)}>💼 Internships</Link>
+                      {/* LINKED TO PROFILE PAGE SECTIONS */}
+                      <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                        <i className="fa-solid fa-user-gear" style={{ marginRight: '10px' }}></i> Edit Profile
+                      </Link>
                       
-                      <Link to="/courses" className="dropdown-item" onClick={() => setShowDropdown(false)}>📚 My Courses</Link>
-                      <Link to="/quizzes" className="dropdown-item" onClick={() => setShowDropdown(false)}>📝 Quizzes</Link>
+                      <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                        <i className="fa-solid fa-briefcase" style={{ marginRight: '10px' }}></i> Internships
+                      </Link>
+                      
+                      <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                        <i className="fa-solid fa-graduation-cap" style={{ marginRight: '10px' }}></i> My Courses
+                      </Link>
+                      
+                      <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                        <i className="fa-solid fa-trophy" style={{ marginRight: '10px' }}></i> Quiz Stats
+                      </Link>
+                      
                       <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
+                      
                       <button 
                         onClick={handleLogout}
                         style={{
@@ -155,10 +170,13 @@ const Navbar = ({ user, setUser }) => {
                           border: 'none',
                           color: '#ff4d4d',
                           fontWeight: 'bold',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px'
                         }}
                       >
-                        🚪 Log Out
+                        <i className="fa-solid fa-right-from-bracket"></i> Log Out
                       </button>
                     </div>
                   )}
