@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -9,20 +9,18 @@ import Quizzes from './pages/Quizzes';
 import Blog from './pages/Blog';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import ForgotPassword from './pages/ForgotPassword';
-import Dashboard from './pages/Dashboard'; 
+import ForgotPassword from './pages/ForgotPassword'; // ✅ Added this import
 import './App.css';
 
 function Layout({ user, setUser }) {
   const location = useLocation();
   
-  // ✅ ADDED "/dashboard" HERE:
-  // This ensures the standard top Navbar and bottom Footer disappear 
-  // when you are on the Dashboard page.
-  const hideLayout = ["/login", "/signup", "/forgot-password", "/dashboard"].includes(location.pathname);
+  // ✅ Updated to include "/forgot-password" so the Navbar/Footer stays hidden there too
+  const hideLayout = ["/login", "/signup", "/forgot-password"].includes(location.pathname);
 
   return (
     <>
+      {/* Passes user state to Navbar to toggle between "Log In" and "Log Out" */}
       {!hideLayout && <Navbar user={user} setUser={setUser} />}
       
       <Routes>
@@ -32,15 +30,11 @@ function Layout({ user, setUser }) {
         <Route path="/quizzes" element={<Quizzes />} />
         <Route path="/blog" element={<Blog />} />
         
+        {/* Auth Routes: All three pass setUser to handle the login logic */}
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-
-        {/* Protected Dashboard Route */}
-        <Route 
-          path="/dashboard" 
-          element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" />} 
-        />
+        
       </Routes>
       
       {!hideLayout && <Footer />}
@@ -51,6 +45,7 @@ function Layout({ user, setUser }) {
 function App() {
   const [user, setUser] = useState(null);
 
+  // Checks if the user is already logged in when the browser refreshes
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
